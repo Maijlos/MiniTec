@@ -1,0 +1,5 @@
+DROP TABLE User
+DROP TABLE Project
+DROP TABLE Station
+DROP TABLE State
+DROP TABLE User_Project
