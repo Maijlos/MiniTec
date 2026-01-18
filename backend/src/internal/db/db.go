@@ -17,24 +17,24 @@ func New(url string) (*minitec_db.Queries, error) {
 		slog.Error("Error connecting to database")
 		return nil, err
 	}
-	
-    driver, err := mysql.WithInstance(db, &mysql.Config{})
+
+	driver, err := mysql.WithInstance(db, &mysql.Config{})
 	if err != nil {
 		slog.Error("Error creating database instance")
 		return nil, err
 	}
 
-    m, err := migrate.NewWithDatabaseInstance(
-        "file://db/migrations",
-        "mysql", 
-        driver,
-    )
+	m, err := migrate.NewWithDatabaseInstance(
+		"file://db/migrations",
+		"mysql",
+		driver,
+	)
 	if err != nil {
 		slog.Error("Error creating migration instance")
 		return nil, err
 	}
-    
-    err = m.Up()
+
+	err = m.Up()
 	if err != nil {
 		slog.Error("Error running migrations")
 		return nil, err

@@ -11,10 +11,10 @@ import (
 
 func New(queries *minitec_db.Queries) error {
 	e := echo.New()
-	
+
 	// TODO not secure, just do it for my frontend
 	e.Use(middleware.CORS())
-	
+
 	e.GET("/", func(c echo.Context) error {
 		return c.JSON(http.StatusOK, map[string]string{"message": "Hello, World!"})
 	})
