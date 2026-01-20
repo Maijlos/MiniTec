@@ -1,8 +1,10 @@
 package main
 
 import (
-	"backend/src/internal/api"
 	"backend/src/internal/db"
+	"backend/src/internal/http"
+	"backend/src/internal/http/controllers"
+	"backend/src/internal/http/services"
 	"log/slog"
 	"os"
 
@@ -28,7 +30,10 @@ func main() {
 		os.Exit(1)
 	}
 
-	err = api.New(queries)
+	services := services.New(queries)
+	controllers := controllers.New(services)
+
+	err = http.New(controllers)
 	if err != nil {
 		slog.Error("Error starting server")
 		os.Exit(1)

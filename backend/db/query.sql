@@ -19,10 +19,15 @@ INSERT INTO State (final_state, start_date, end_date, station_id)
 VALUES (?, ?, ?, ?);
 
 -- name: ListProjects :many
-SELECT * FROM Project;
+SELECT * FROM Project 
+ORDER BY code 
+LIMIT ? OFFSET ?;
 
 -- name: GetProject :one
 SELECT * FROM Project WHERE id = ?;
+
+-- name: DeleteProject :execresult
+DELETE FROM Project WHERE id = ?;
 
 -- name: ListUsers :many
 SELECT * FROM User;

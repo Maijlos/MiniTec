@@ -35,7 +35,7 @@ func New(url string) (*minitec_db.Queries, error) {
 	}
 
 	err = m.Up()
-	if err != nil {
+	if err != nil && err != migrate.ErrNoChange {
 		slog.Error("Error running migrations")
 		return nil, err
 	}

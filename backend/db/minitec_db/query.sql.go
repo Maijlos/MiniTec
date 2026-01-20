@@ -132,6 +132,14 @@ func (q *Queries) CreateUserProject(ctx context.Context, arg CreateUserProjectPa
 	return q.db.ExecContext(ctx, createUserProject, arg.UserID, arg.ProjectID)
 }
 
+const deleteProject = `-- name: DeleteProject :execresult
+DELETE FROM Project WHERE id = ?
+`
+
+func (q *Queries) DeleteProject(ctx context.Context, id int64) (sql.Result, error) {
+	return q.db.ExecContext(ctx, deleteProject, id)
+}
+
 const getActiveStationState = `-- name: GetActiveStationState :one
 SELECT id, final_state, start_date, end_date, station_id FROM State
 WHERE station_id = ? AND end_date IS NULL
@@ -198,11 +206,18 @@ func (q *Queries) GetUser(ctx context.Context, id int64) (User, error) {
 }
 
 const listProjects = `-- name: ListProjects :many
-SELECT id, name, code FROM Project
+SELECT id, name, code FROM Project 
+ORDER BY code 
+LIMIT ? OFFSET ?
 `
 
-func (q *Queries) ListProjects(ctx context.Context) ([]Project, error) {
-	rows, err := q.db.QueryContext(ctx, listProjects)
+type ListProjectsParams struct {
+	Limit  int32
+	Offset int32
+}
+
+func (q *Queries) ListProjects(ctx context.Context, arg ListProjectsParams) ([]Project, error) {
+	rows, err := q.db.QueryContext(ctx, listProjects, arg.Limit, arg.Offset)
 	if err != nil {
 		return nil, err
 	}
