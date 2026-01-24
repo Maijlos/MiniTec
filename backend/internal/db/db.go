@@ -11,17 +11,17 @@ import (
 	_ "github.com/golang-migrate/migrate/v4/source/file"
 )
 
-func New(url string) (*minitec_db.Queries, error) {
+func New(url string) (*sql.DB, *minitec_db.Queries, error) {
 	db, err := sql.Open("mysql", url)
 	if err != nil {
 		slog.Error("Error connecting to database")
-		return nil, err
+		return nil, nil, err
 	}
 
 	driver, err := mysql.WithInstance(db, &mysql.Config{})
 	if err != nil {
 		slog.Error("Error creating database instance")
-		return nil, err
+		return nil, nil, err
 	}
 
 	m, err := migrate.NewWithDatabaseInstance(
@@ -31,17 +31,17 @@ func New(url string) (*minitec_db.Queries, error) {
 	)
 	if err != nil {
 		slog.Error("Error creating migration instance")
-		return nil, err
+		return nil, nil, err
 	}
 
 	err = m.Up()
 	if err != nil && err != migrate.ErrNoChange {
 		slog.Error("Error running migrations")
-		return nil, err
+		return nil, nil, err
 	}
 
 	queries := minitec_db.New(db)
 
-	return queries, nil
+	return db, queries, nil
 
 }

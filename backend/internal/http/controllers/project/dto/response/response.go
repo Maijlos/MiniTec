@@ -20,6 +20,12 @@ type ErrorResponse struct {
 	Message      string `json:"message"`
 }
 
+type ErrorParsingCSV struct {
+	Code     int              `json:"code"`
+	Messages string           `json:"messages"`
+	Errors   map[string][]int `json:"errors"`
+}
+
 func MapModelsToResponse(ps []minitec_db.Project) []Project {
 	var projects []Project
 	for _, p := range ps {

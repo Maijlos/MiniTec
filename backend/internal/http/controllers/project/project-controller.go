@@ -1,13 +1,15 @@
 package project
 
 import (
-	"backend/src/internal/http/controllers/project/dto/request"
-	"backend/src/internal/http/controllers/project/dto/response"
-	"backend/src/internal/http/messages"
-	"backend/src/internal/http/services/project"
+	"backend/internal/http/controllers/project/dto/request"
+	"backend/internal/http/controllers/project/dto/response"
+	"backend/internal/http/messages"
+	projectService "backend/internal/http/services/project"
+	stateService "backend/internal/http/services/state"
+	stationService "backend/internal/http/services/station"
 	"database/sql"
+	"encoding/csv"
 	"errors"
-	"log/slog"
 	"net/http"
 	"strconv"
 
@@ -15,12 +17,16 @@ import (
 )
 
 type Project struct {
-	Service *project.Project
+	ProjectService *projectService.Project
+	StationService *stationService.Station
+	StateService   *stateService.State
 }
 
-func New(project *project.Project) *Project {
+func New(ProjectService *projectService.Project, StationService *stationService.Station, StateService *stateService.State) *Project {
 	return &Project{
-		Service: project,
+		ProjectService: ProjectService,
+		StationService: StationService,
+		StateService:   StateService,
 	}
 }
 
@@ -43,7 +49,7 @@ func (p *Project) CreateProject(c echo.Context) error {
 	}
 
 	ctx := c.Request().Context()
-	id, err := p.Service.CreateProject(ctx, u.Code, u.Name)
+	id, err := p.ProjectService.CreateProject(ctx, u.Code, u.Name)
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, response.ErrorResponse{
 			Code:         http.StatusInternalServerError,
@@ -77,7 +83,7 @@ func (p *Project) GetProject(c echo.Context) error {
 	}
 
 	ctx := c.Request().Context()
-	project, err := p.Service.GetProject(ctx, id)
+	project, err := p.ProjectService.GetProject(ctx, id)
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
 			return c.JSON(http.StatusNotFound, response.ErrorResponse{
@@ -117,11 +123,11 @@ func (p *Project) DeleteProject(c echo.Context) error {
 	}
 
 	ctx := c.Request().Context()
-	err = p.Service.DeleteProject(ctx, id)
+	err = p.ProjectService.DeleteProject(ctx, id)
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
-			return c.JSON(http.StatusNotFound, response.ErrorResponse{
-				Code:         http.StatusNotFound,
+			return c.JSON(http.StatusNoContent, response.ErrorResponse{
+				Code:         http.StatusNoContent,
 				Message:      messages.ID_NOT_FOUND,
 				ShortMessage: messages.ID_NOT_FOUND_SHORT,
 			})
@@ -142,7 +148,6 @@ func (p *Project) DeleteProject(c echo.Context) error {
 }
 
 func (p *Project) ListProjects(c echo.Context) error {
-	slog.Info("Listing projects")
 	limit := int64(10)
 	offset := int64(0)
 	limitString := c.QueryParam("limit")
@@ -171,9 +176,10 @@ func (p *Project) ListProjects(c echo.Context) error {
 	}
 
 	ctx := c.Request().Context()
+
 	limit32 := int32(limit)
 	offset32 := int32(offset)
-	projects, err := p.Service.ListProjects(ctx, limit32, offset32)
+	projects, err := p.ProjectService.ListProjects(ctx, limit32, offset32)
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, response.ErrorResponse{
 			Code:         http.StatusInternalServerError,
@@ -186,5 +192,64 @@ func (p *Project) ListProjects(c echo.Context) error {
 		Code:         http.StatusOK,
 		ShortMessage: messages.SUCCESS,
 		Data:         response.MapModelsToResponse(projects),
+	})
+}
+
+func (p *Project) ProjectHealth(c echo.Context) error {
+	idParam := c.Param("id")
+	id, err := strconv.ParseInt(idParam, 10, 64)
+	if err != nil {
+		return c.JSON(http.StatusBadRequest, response.ErrorResponse{
+			Code:         http.StatusBadRequest,
+			Message:      messages.INVALID_ID,
+			ShortMessage: messages.INVALID_ID_SHORT,
+		})
+	}
+
+	ctx := c.Request().Context()
+	project, err := p.ProjectService.GetProject(ctx, id)
+	if err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			return c.JSON(http.StatusNotFound, response.ErrorResponse{
+				Code:         http.StatusNotFound,
+				Message:      messages.ID_NOT_FOUND,
+				ShortMessage: messages.ID_NOT_FOUND_SHORT,
+			})
+		}
+
+		return c.JSON(http.StatusInternalServerError, response.ErrorResponse{
+			Code:         http.StatusInternalServerError,
+			Message:      messages.SERVER_ERROR,
+			ShortMessage: messages.SERVER_ERROR_SHORT,
+		})
+	}
+
+	body := c.Request().Body
+	defer func() {
+		_ = body.Close()
+	}()
+
+	reader := csv.NewReader(body)
+	errs, err := p.ProjectService.ProjectHealth(ctx, project.ID, reader)
+	if err != nil {
+		return c.JSON(http.StatusInternalServerError, response.ErrorResponse{
+			Code:         http.StatusInternalServerError,
+			Message:      messages.SERVER_ERROR,
+			ShortMessage: messages.SERVER_ERROR_SHORT,
+		})
+	}
+
+	if errs != nil {
+		return c.JSON(http.StatusBadRequest, response.ErrorParsingCSV{
+			Code:     http.StatusBadRequest,
+			Messages: "Invalid CSV file",
+			Errors:   errs,
+		})
+	}
+
+	return c.JSON(http.StatusOK, response.SuccessfulResponse{
+		Code:         http.StatusOK,
+		ShortMessage: messages.SUCCESS,
+		Data:         []response.Project{},
 	})
 }

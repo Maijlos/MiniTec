@@ -1,0 +1,5 @@
+ALTER TABLE State 
+MODIFY COLUMN start_date DATE;
+
+ALTER TABLE State 
+MODIFY COLUMN end_date DATE;

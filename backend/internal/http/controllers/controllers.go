@@ -1,8 +1,8 @@
 package controllers
 
 import (
-	"backend/src/internal/http/controllers/project"
-	"backend/src/internal/http/services"
+	"backend/internal/http/controllers/project"
+	"backend/internal/http/services"
 )
 
 type Controller struct {
@@ -12,6 +12,6 @@ type Controller struct {
 
 func New(services *services.Services) *Controller {
 	return &Controller{
-		Project: project.New(services.Project),
+		Project: project.New(services.Project, services.Station, services.State),
 	}
 }

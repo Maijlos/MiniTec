@@ -14,8 +14,8 @@ CREATE TABLE Station (
 CREATE TABLE State (
     id BIGINT NOT NULL AUTO_INCREMENT PRIMARY KEY,
     final_state INT,
-    start_date DATE,
-    end_date DATE,
+    start_date DATETIME,
+    end_date DATETIME,
     station_id BIGINT NOT NULL,
     FOREIGN KEY (station_id) REFERENCES Station(id)
 );

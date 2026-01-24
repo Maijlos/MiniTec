@@ -14,6 +14,9 @@ VALUES (?, ?);
 INSERT INTO Station (name, project_id)
 VALUES (?, ?);
 
+-- name: GetStationId :one
+SELECT id FROM Station WHERE name = ? AND project_id = ?;
+
 -- name: CreateState :execresult
 INSERT INTO State (final_state, start_date, end_date, station_id)
 VALUES (?, ?, ?, ?);

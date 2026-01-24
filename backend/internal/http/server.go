@@ -1,7 +1,7 @@
 package http
 
 import (
-	"backend/src/internal/http/controllers"
+	"backend/internal/http/controllers"
 	"log/slog"
 	"net/http"
 
@@ -46,4 +46,5 @@ func defineRoutes(e *echo.Echo, c *controllers.Controller) {
 	project.POST("", c.Project.CreateProject)
 	// project.PUT("/:id", c.Project.UpdateProject)
 	project.DELETE("/:id", c.Project.DeleteProject)
+	project.POST("/health/:id", c.Project.ProjectHealth)
 }

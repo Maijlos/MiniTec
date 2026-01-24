@@ -187,6 +187,22 @@ func (q *Queries) GetState(ctx context.Context, id int64) (State, error) {
 	return i, err
 }
 
+const getStationId = `-- name: GetStationId :one
+SELECT id FROM Station WHERE name = ? AND project_id = ?
+`
+
+type GetStationIdParams struct {
+	Name      string
+	ProjectID int64
+}
+
+func (q *Queries) GetStationId(ctx context.Context, arg GetStationIdParams) (int64, error) {
+	row := q.db.QueryRowContext(ctx, getStationId, arg.Name, arg.ProjectID)
+	var id int64
+	err := row.Scan(&id)
+	return id, err
+}
+
 const getUser = `-- name: GetUser :one
 SELECT id, first_name, second_name, email, isadmin, isbanned FROM User WHERE id = ?
 `

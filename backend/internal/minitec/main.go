@@ -1,10 +1,10 @@
 package main
 
 import (
-	"backend/src/internal/db"
-	"backend/src/internal/http"
-	"backend/src/internal/http/controllers"
-	"backend/src/internal/http/services"
+	"backend/internal/db"
+	"backend/internal/http"
+	"backend/internal/http/controllers"
+	"backend/internal/http/services"
 	"log/slog"
 	"os"
 
@@ -24,13 +24,13 @@ func main() {
 		os.Exit(1)
 	}
 
-	queries, err := db.New(database_url)
+	db, queries, err := db.New(database_url)
 	if err != nil {
 		slog.Error("Error connecting to database")
 		os.Exit(1)
 	}
 
-	services := services.New(queries)
+	services := services.New(db, queries)
 	controllers := controllers.New(services)
 
 	err = http.New(controllers)
