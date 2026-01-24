@@ -126,8 +126,8 @@ func (p *Project) DeleteProject(c echo.Context) error {
 	err = p.ProjectService.DeleteProject(ctx, id)
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
-			return c.JSON(http.StatusNoContent, response.ErrorResponse{
-				Code:         http.StatusNoContent,
+			return c.JSON(http.StatusNotFound, response.ErrorResponse{
+				Code:         http.StatusNotFound,
 				Message:      messages.ID_NOT_FOUND,
 				ShortMessage: messages.ID_NOT_FOUND_SHORT,
 			})

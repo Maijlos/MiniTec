@@ -8,7 +8,7 @@ CREATE TABLE Station (
   id BIGINT NOT NULL AUTO_INCREMENT PRIMARY KEY,
   name text NOT NULL,
   project_id BIGINT NOT NULL,
-  FOREIGN KEY (project_id) REFERENCES Project(id)
+  FOREIGN KEY (project_id) REFERENCES Project(id) ON DELETE CASCADE
 );
 
 CREATE TABLE State (
@@ -17,7 +17,7 @@ CREATE TABLE State (
     start_date DATETIME,
     end_date DATETIME,
     station_id BIGINT NOT NULL,
-    FOREIGN KEY (station_id) REFERENCES Station(id)
+    FOREIGN KEY (station_id) REFERENCES Station(id) ON DELETE CASCADE
 );
 
 CREATE TABLE User (
@@ -34,5 +34,5 @@ CREATE TABLE User_Project (
     user_id BIGINT NOT NULL,
     project_id BIGINT NOT NULL,
     FOREIGN KEY (user_id) REFERENCES User(id),
-    FOREIGN KEY (project_id) REFERENCES Project(id)
+    FOREIGN KEY (project_id) REFERENCES Project(id) ON DELETE CASCADE
 );
