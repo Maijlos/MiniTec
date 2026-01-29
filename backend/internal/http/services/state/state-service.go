@@ -23,7 +23,7 @@ func New(db *sql.DB, queries *minitec_db.Queries) *State {
 func (s *State) CreateState(ctx context.Context, tx *sql.Tx, stationId int64, startDate time.Time, endDate time.Time, finalStatus int32) (*int64, error) {
 	qtx := s.queries.WithTx(tx)
 	result, err := qtx.CreateState(ctx, minitec_db.CreateStateParams{
-		FinalState: sql.NullInt32{Int32: finalStatus, Valid: true},
+		FinalState: finalStatus,
 		StartDate:  sql.NullTime{Time: startDate, Valid: !startDate.IsZero()},
 		EndDate:    sql.NullTime{Time: endDate, Valid: !endDate.IsZero()},
 		StationID:  stationId,
@@ -41,4 +41,13 @@ func (s *State) CreateState(ctx context.Context, tx *sql.Tx, stationId int64, st
 	}
 
 	return &id, nil
+}
+
+func (s *State) GetAllStatesByStation(ctx context.Context, stationId int64) ([]minitec_db.State, error) {
+	result, err := s.queries.ListStationsByStation(ctx, stationId)
+	if err != nil {
+		slog.Error("Failed to read from DB")
+		return nil, err
+	}
+	return result, nil
 }

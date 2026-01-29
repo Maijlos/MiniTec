@@ -9,6 +9,7 @@ import (
 	"database/sql"
 	"encoding/csv"
 	"log/slog"
+	"strconv"
 )
 
 type Project struct {
@@ -16,6 +17,11 @@ type Project struct {
 	queries *minitec_db.Queries
 	station *station.Station
 	state   *state.State
+}
+type StringState struct {
+	FinalStatus string `json:"final_status"`
+	StartDate   string `json:"start_date"`
+	EndDate     string `json:"end_date"`
 }
 
 func New(db *sql.DB, queries *minitec_db.Queries, station *station.Station, state *state.State) *Project {
@@ -119,4 +125,43 @@ func (p *Project) ProjectHealth(ctx context.Context, id int64, reader *csv.Reade
 
 	_ = tx.Commit()
 	return nil, nil
+}
+
+func (p *Project) GetProjectHealth(ctx context.Context, id int64) (map[string][]StringState, error) {
+	
+	data := make(map[string][]StringState)
+
+	stations, err := p.station.GetStationsToProject(ctx, id)
+	if err != nil {
+		return nil, err
+	}
+
+	for _, station := range stations {
+		states, err := p.state.GetAllStatesByStation(ctx, station.ID)
+		if err != nil {
+			return nil, err
+		}
+		data[station.Name] = make([]StringState, 0)
+
+		for _, state := range states {
+			finalState := strconv.Itoa(int(state.FinalState))
+			startDate := "none"
+			endDate := "none"
+			
+			if state.StartDate.Valid {
+				startDate = state.StartDate.Time.Format("02-01-2006 15:04:05")
+			}
+			if state.EndDate.Valid {
+				endDate = state.EndDate.Time.Format("02-01-2006 15:04:05")
+			}
+
+			data[station.Name] = append(data[station.Name], StringState{
+				FinalStatus: finalState,
+				StartDate:   startDate,
+				EndDate:     endDate,
+			})
+		}
+	}
+
+	return data, nil
 }

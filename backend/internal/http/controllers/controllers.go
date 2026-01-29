@@ -12,6 +12,6 @@ type Controller struct {
 
 func New(services *services.Services) *Controller {
 	return &Controller{
-		Project: project.New(services.Project, services.Station, services.State),
+		Project: project.New(services.Project),
 	}
 }

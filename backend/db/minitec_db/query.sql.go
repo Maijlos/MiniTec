@@ -66,7 +66,7 @@ VALUES (?, ?, ?, ?)
 `
 
 type CreateStateParams struct {
-	FinalState sql.NullInt32
+	FinalState int32
 	StartDate  sql.NullTime
 	EndDate    sql.NullTime
 	StationID  int64
@@ -286,30 +286,21 @@ func (q *Queries) ListProjectsWithoutUsers(ctx context.Context) ([]string, error
 	return items, nil
 }
 
-const listStationHistory = `-- name: ListStationHistory :many
-SELECT st.final_state, st.start_date, st.end_date
-FROM State st
-WHERE st.station_id = ?
-ORDER BY st.start_date DESC
+const listStationsByProject = `-- name: ListStationsByProject :many
+SELECT id, name, project_id FROM Station WHERE project_id = ?
 `
 
-type ListStationHistoryRow struct {
-	FinalState sql.NullInt32
-	StartDate  sql.NullTime
-	EndDate    sql.NullTime
-}
-
-// Get the history of states for a specific station, ordered by start date
-func (q *Queries) ListStationHistory(ctx context.Context, stationID int64) ([]ListStationHistoryRow, error) {
-	rows, err := q.db.QueryContext(ctx, listStationHistory, stationID)
+// Get all stations associated with a specific project
+func (q *Queries) ListStationsByProject(ctx context.Context, projectID int64) ([]Station, error) {
+	rows, err := q.db.QueryContext(ctx, listStationsByProject, projectID)
 	if err != nil {
 		return nil, err
 	}
 	defer rows.Close()
-	var items []ListStationHistoryRow
+	var items []Station
 	for rows.Next() {
-		var i ListStationHistoryRow
-		if err := rows.Scan(&i.FinalState, &i.StartDate, &i.EndDate); err != nil {
+		var i Station
+		if err := rows.Scan(&i.ID, &i.Name, &i.ProjectID); err != nil {
 			return nil, err
 		}
 		items = append(items, i)
@@ -323,30 +314,28 @@ func (q *Queries) ListStationHistory(ctx context.Context, stationID int64) ([]Li
 	return items, nil
 }
 
-const listStationsByProject = `-- name: ListStationsByProject :many
-SELECT s.id, s.name, p.name as project_name
-FROM Station s
-JOIN Project p ON s.project_id = p.id
-WHERE p.id = ?
+const listStationsByStation = `-- name: ListStationsByStation :many
+SELECT id, final_state, start_date, end_date, station_id FROM State WHERE station_id = ?
+ORDER BY State.start_date ASC
 `
 
-type ListStationsByProjectRow struct {
-	ID          int64
-	Name        string
-	ProjectName string
-}
-
-// Get all stations associated with a specific project
-func (q *Queries) ListStationsByProject(ctx context.Context, id int64) ([]ListStationsByProjectRow, error) {
-	rows, err := q.db.QueryContext(ctx, listStationsByProject, id)
+// Get all states associated with a specific station
+func (q *Queries) ListStationsByStation(ctx context.Context, stationID int64) ([]State, error) {
+	rows, err := q.db.QueryContext(ctx, listStationsByStation, stationID)
 	if err != nil {
 		return nil, err
 	}
 	defer rows.Close()
-	var items []ListStationsByProjectRow
+	var items []State
 	for rows.Next() {
-		var i ListStationsByProjectRow
-		if err := rows.Scan(&i.ID, &i.Name, &i.ProjectName); err != nil {
+		var i State
+		if err := rows.Scan(
+			&i.ID,
+			&i.FinalState,
+			&i.StartDate,
+			&i.EndDate,
+			&i.StationID,
+		); err != nil {
 			return nil, err
 		}
 		items = append(items, i)

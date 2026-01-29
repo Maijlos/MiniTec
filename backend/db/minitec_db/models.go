@@ -16,7 +16,7 @@ type Project struct {
 
 type State struct {
 	ID         int64
-	FinalState sql.NullInt32
+	FinalState int32
 	StartDate  sql.NullTime
 	EndDate    sql.NullTime
 	StationID  int64

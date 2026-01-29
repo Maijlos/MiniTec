@@ -43,17 +43,12 @@ SELECT * FROM State WHERE id = ?;
 
 -- Get all stations associated with a specific project
 -- name: ListStationsByProject :many
-SELECT s.id, s.name, p.name as project_name
-FROM Station s
-JOIN Project p ON s.project_id = p.id
-WHERE p.id = ?;
+SELECT * FROM Station WHERE project_id = ?;
 
--- Get the history of states for a specific station, ordered by start date
--- name: ListStationHistory :many
-SELECT st.final_state, st.start_date, st.end_date
-FROM State st
-WHERE st.station_id = ?
-ORDER BY st.start_date DESC;
+-- Get all states associated with a specific station
+-- name: ListStationsByStation :many
+SELECT * FROM State WHERE station_id = ?
+ORDER BY State.start_date ASC;
 
 -- Find the current active state for a station (assuming null end_date means active)
 -- name: GetActiveStationState :one

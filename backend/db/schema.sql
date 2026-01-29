@@ -13,7 +13,7 @@ CREATE TABLE Station (
 
 CREATE TABLE State (
     id BIGINT NOT NULL AUTO_INCREMENT PRIMARY KEY,
-    final_state INT,
+    final_state INT NOT NULL,
     start_date DATETIME,
     end_date DATETIME,
     station_id BIGINT NOT NULL,

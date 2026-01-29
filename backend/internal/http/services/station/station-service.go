@@ -40,6 +40,16 @@ func (s *Station) CreateStation(ctx context.Context, projectId int64, name strin
 	return &id, nil
 }
 
+func (s *Station) GetStationsToProject(ctx context.Context, projectId int64) ([]minitec_db.Station, error) {
+	result, err := s.Queries.ListStationsByProject(ctx, projectId)
+	if err != nil {
+		slog.Error("Failed to read from DB")
+		return nil, err
+	}
+
+	return result, err
+}
+
 func (s *Station) GetStationId(ctx context.Context, projectId int64, name string, tx *sql.Tx) (*int64, error) {
 	qtx := s.Queries.WithTx(tx)
 	id, err := qtx.GetStationId(ctx, minitec_db.GetStationIdParams{

@@ -47,4 +47,5 @@ func defineRoutes(e *echo.Echo, c *controllers.Controller) {
 	// project.PUT("/:id", c.Project.UpdateProject)
 	project.DELETE("/:id", c.Project.DeleteProject)
 	project.POST("/health/:id", c.Project.ProjectHealth)
+	project.GET("/health/:id", c.Project.GetProjectHealth)
 }

@@ -5,8 +5,6 @@ import (
 	"backend/internal/http/controllers/project/dto/response"
 	"backend/internal/http/messages"
 	projectService "backend/internal/http/services/project"
-	stateService "backend/internal/http/services/state"
-	stationService "backend/internal/http/services/station"
 	"database/sql"
 	"encoding/csv"
 	"errors"
@@ -18,15 +16,11 @@ import (
 
 type Project struct {
 	ProjectService *projectService.Project
-	StationService *stationService.Station
-	StateService   *stateService.State
 }
 
-func New(ProjectService *projectService.Project, StationService *stationService.Station, StateService *stateService.State) *Project {
+func New(ProjectService *projectService.Project) *Project {
 	return &Project{
 		ProjectService: ProjectService,
-		StationService: StationService,
-		StateService:   StateService,
 	}
 }
 
@@ -251,5 +245,50 @@ func (p *Project) ProjectHealth(c echo.Context) error {
 		Code:         http.StatusOK,
 		ShortMessage: messages.SUCCESS,
 		Data:         []response.Project{},
+	})
+}
+
+func (p *Project) GetProjectHealth(c echo.Context) error {
+	idParam := c.Param("id")
+	id, err := strconv.ParseInt(idParam, 10, 64)
+	if err != nil {
+		return c.JSON(http.StatusBadRequest, response.ErrorResponse{
+			Code:         http.StatusBadRequest,
+			Message:      messages.INVALID_ID,
+			ShortMessage: messages.INVALID_ID_SHORT,
+		})
+	}
+
+	ctx := c.Request().Context()
+	project, err := p.ProjectService.GetProject(ctx, id)
+	if err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			return c.JSON(http.StatusNotFound, response.ErrorResponse{
+				Code:         http.StatusNotFound,
+				Message:      messages.ID_NOT_FOUND,
+				ShortMessage: messages.ID_NOT_FOUND_SHORT,
+			})
+		}
+
+		return c.JSON(http.StatusInternalServerError, response.ErrorResponse{
+			Code:         http.StatusInternalServerError,
+			Message:      messages.SERVER_ERROR,
+			ShortMessage: messages.SERVER_ERROR_SHORT,
+		})
+	}
+
+	result, err :=p.ProjectService.GetProjectHealth(ctx, project.ID)
+	if err != nil {
+		return c.JSON(http.StatusInternalServerError, response.ErrorResponse{
+			Code:         http.StatusInternalServerError,
+			Message:      messages.SERVER_ERROR,
+			ShortMessage: messages.SERVER_ERROR_SHORT,
+		})
+	}
+
+	return c.JSON(http.StatusOK, response.SuccessfulResponseHealth{
+		Code:         http.StatusOK,
+		ShortMessage: messages.SUCCESS,
+		Data:         result,
 	})
 }

@@ -1,6 +1,10 @@
 package response
 
-import "backend/db/minitec_db"
+import (
+	"backend/db/minitec_db"
+	"backend/internal/http/services/project"
+)
+
 
 type Project struct {
 	Id   int64  `json:"id"`
@@ -12,6 +16,12 @@ type SuccessfulResponse struct {
 	Code         int       `json:"code"`
 	ShortMessage string    `json:"short_message"`
 	Data         []Project `json:"data"`
+}
+
+type SuccessfulResponseHealth struct {
+	Code         int       `json:"code"`
+	ShortMessage string    `json:"short_message"`
+	Data         map[string][]project.StringState `json:"data"`
 }
 
 type ErrorResponse struct {
