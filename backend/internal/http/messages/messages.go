@@ -10,8 +10,8 @@ const (
 	INVALID_ID       string = "Invalid ID format"
 	INVALID_ID_SHORT string = "invalid_id"
 
-	ID_NOT_FOUND              = "ID doesn't exist"
-	ID_NOT_FOUND_SHORT string = "id_not_found"
+	NOT_FOUND       string = "Record doesn't exist"
+	NOT_FOUND_SHORT string = "not_found"
 
 	INVALID_LIMIT       string = "Invalid limit format"
 	INVALID_LIMIT_SHORT string = "invalid_limit"

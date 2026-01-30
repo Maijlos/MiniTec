@@ -45,6 +45,7 @@ func defineRoutes(e *echo.Echo, c *controllers.Controller) {
 	project := e.Group("/project")
 	project.GET("", c.Project.ListProjects)
 	project.GET("/:id", c.Project.GetProject)
+	project.GET("/code", c.Project.GetProjectByCode)
 	project.POST("", c.Project.CreateProject)
 	// project.PUT("/:id", c.Project.UpdateProject)
 	project.DELETE("/:id", c.Project.DeleteProject)

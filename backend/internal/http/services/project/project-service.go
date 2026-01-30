@@ -67,6 +67,16 @@ func (p *Project) GetProject(ctx context.Context, id int64) (minitec_db.Project,
 	return result, err
 }
 
+func (p *Project) GetProjectByCode(ctx context.Context, code string) (minitec_db.Project, error) {
+	result, err := p.queries.GetProjectByCode(ctx, code)
+	if err != nil {
+		slog.Error("Failed to read from DB")
+		return minitec_db.Project{}, err
+	}
+
+	return result, err
+}
+
 func (p *Project) UpdateProject() {
 
 }

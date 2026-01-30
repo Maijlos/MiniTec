@@ -170,6 +170,17 @@ func (q *Queries) GetProject(ctx context.Context, id int64) (Project, error) {
 	return i, err
 }
 
+const getProjectByCode = `-- name: GetProjectByCode :one
+SELECT id, name, code FROM Project WHERE code = ?
+`
+
+func (q *Queries) GetProjectByCode(ctx context.Context, code string) (Project, error) {
+	row := q.db.QueryRowContext(ctx, getProjectByCode, code)
+	var i Project
+	err := row.Scan(&i.ID, &i.Name, &i.Code)
+	return i, err
+}
+
 const getState = `-- name: GetState :one
 SELECT id, final_state, start_date, end_date, station_id FROM State WHERE id = ?
 `

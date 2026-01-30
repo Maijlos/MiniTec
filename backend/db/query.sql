@@ -29,6 +29,9 @@ LIMIT ? OFFSET ?;
 -- name: GetProject :one
 SELECT * FROM Project WHERE id = ?;
 
+-- name: GetProjectByCode :one
+SELECT * FROM Project WHERE code = ?;
+
 -- name: DeleteProject :execresult
 DELETE FROM Project WHERE id = ?;
 

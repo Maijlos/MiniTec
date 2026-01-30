@@ -82,8 +82,8 @@ func (p *Project) GetProject(c echo.Context) error {
 		if errors.Is(err, sql.ErrNoRows) {
 			return c.JSON(http.StatusNotFound, response.ErrorResponse{
 				Code:         http.StatusNotFound,
-				Message:      messages.ID_NOT_FOUND,
-				ShortMessage: messages.ID_NOT_FOUND_SHORT,
+				Message:      messages.NOT_FOUND,
+				ShortMessage: messages.NOT_FOUND_SHORT,
 			})
 		}
 
@@ -98,6 +98,49 @@ func (p *Project) GetProject(c echo.Context) error {
 		Code:         http.StatusOK,
 		ShortMessage: messages.SUCCESS,
 		Data:         []response.Project{response.MapModelToResponse(project)},
+	})
+}
+
+func (p *Project) GetProjectByCode(c echo.Context) error {
+	u := new(request.GetProjectByCode)
+	if err := c.Bind(u); err != nil {
+		return c.JSON(http.StatusBadRequest, response.ErrorResponse{
+			Code:         http.StatusBadRequest,
+			Message:      messages.INVALID_JSON,
+			ShortMessage: messages.INVALID_JSON_SHORT,
+		})
+	}
+
+	if err := c.Validate(u); err != nil {
+		return c.JSON(http.StatusBadRequest, response.ErrorResponse{
+			Code:         http.StatusBadRequest,
+			Message:      messages.INVALID_BODY,
+			ShortMessage: messages.INVALID_BODY_SHORT,
+		})
+	}
+
+	ctx := c.Request().Context()
+	project, err := p.ProjectService.GetProjectByCode(ctx, u.Code)
+	if err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			return c.JSON(http.StatusNotFound, response.ErrorResponse{
+				Code:         http.StatusNotFound,
+				Message:      messages.NOT_FOUND,
+				ShortMessage: messages.NOT_FOUND_SHORT,
+			})
+		}
+
+		return c.JSON(http.StatusInternalServerError, response.ErrorResponse{
+			Code:         http.StatusInternalServerError,
+			Message:      messages.SERVER_ERROR,
+			ShortMessage: messages.SERVER_ERROR_SHORT,
+		})
+	}
+
+	return c.JSON(http.StatusOK, response.SuccessfulResponse{
+		Code: http.StatusOK,
+		ShortMessage: messages.SUCCESS,
+		Data: []response.Project{response.MapModelToResponse(project)},
 	})
 }
 
@@ -122,8 +165,8 @@ func (p *Project) DeleteProject(c echo.Context) error {
 		if errors.Is(err, sql.ErrNoRows) {
 			return c.JSON(http.StatusNotFound, response.ErrorResponse{
 				Code:         http.StatusNotFound,
-				Message:      messages.ID_NOT_FOUND,
-				ShortMessage: messages.ID_NOT_FOUND_SHORT,
+				Message:      messages.NOT_FOUND,
+				ShortMessage: messages.NOT_FOUND_SHORT,
 			})
 		}
 
@@ -206,8 +249,8 @@ func (p *Project) ProjectHealth(c echo.Context) error {
 		if errors.Is(err, sql.ErrNoRows) {
 			return c.JSON(http.StatusNotFound, response.ErrorResponse{
 				Code:         http.StatusNotFound,
-				Message:      messages.ID_NOT_FOUND,
-				ShortMessage: messages.ID_NOT_FOUND_SHORT,
+				Message:      messages.NOT_FOUND,
+				ShortMessage: messages.NOT_FOUND_SHORT,
 			})
 		}
 
@@ -265,8 +308,8 @@ func (p *Project) GetProjectHealth(c echo.Context) error {
 		if errors.Is(err, sql.ErrNoRows) {
 			return c.JSON(http.StatusNotFound, response.ErrorResponse{
 				Code:         http.StatusNotFound,
-				Message:      messages.ID_NOT_FOUND,
-				ShortMessage: messages.ID_NOT_FOUND_SHORT,
+				Message:      messages.NOT_FOUND,
+				ShortMessage: messages.NOT_FOUND_SHORT,
 			})
 		}
 
