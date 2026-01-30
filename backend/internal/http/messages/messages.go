@@ -19,6 +19,9 @@ const (
 	INVALID_OFFSET       string = "Invalid offset format"
 	INVALID_OFFSET_SHORT string = "invalid_offset"
 
+	NOT_AUTHORISED       string = "Not authorised"
+	NOT_AUTHORISED_SHORT string = "not_authorised"
+
 	SERVER_ERROR       string = "Internal server error"
 	SERVER_ERROR_SHORT string = "server_error"
 

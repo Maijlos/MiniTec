@@ -2,6 +2,7 @@ package http
 
 import (
 	"backend/internal/http/controllers"
+	customMiddleware "backend/internal/http/middleware"
 	"log/slog"
 	"net/http"
 
@@ -24,9 +25,10 @@ func (cv *CustomValidator) Validate(i interface{}) error {
 func New(controllers *controllers.Controller) error {
 	e := echo.New()
 	e.Validator = &CustomValidator{validator: validator.New()}
-
+	
 	// TODO not secure, just do it for my frontend
 	e.Use(middleware.CORS())
+	e.Use(customMiddleware.ApiKeyValidator)
 
 	defineRoutes(e, controllers)
 

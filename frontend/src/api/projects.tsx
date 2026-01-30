@@ -1,6 +1,6 @@
-import axios from "axios";
+import axios from "./instance";
 
-type Response = {data: SuccessfulData | ErrorData};
+type Response = { data: SuccessfulData | ErrorData };
 
 type Stations = {
   [name: string]: [
@@ -18,7 +18,6 @@ export type SuccessfulData = {
   shortMessage: "success";
 };
 
-
 export type ErrorData = {
   code: number;
   message: string;
@@ -32,20 +31,24 @@ export type Project = {
 };
 
 export async function getProjects(): Promise<SuccessfulData | ErrorData> {
-  const data: Response = await axios.get(`${import.meta.env.VITE_API_URL}/project`);
+  const data: Response = await axios.get(`/project`);
+  return data.data;
+}
+
+export async function createProject(
+  name: string,
+  code: string,
+): Promise<SuccessfulData | ErrorData> {
+  const data: Response = await axios.post(`/project`, { name, code });
   return data.data;
 }
 
 export async function getProjectHealth(id: number) {
-  const data = await axios.get(
-    `${import.meta.env.VITE_API_URL}/project/health/${id}`,
-  );
+  const data = await axios.get(`/project/health/${id}`);
   return data.data;
 }
 
 export async function deleteProject(id: number) {
-  const data = await axios.delete(
-    `${import.meta.env.VITE_API_URL}/project/${id}`,
-  );
+  const data = await axios.delete(`/project/${id}`);
   return data.data;
 }
