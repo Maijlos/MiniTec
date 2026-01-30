@@ -25,7 +25,7 @@ export function FetchProjects() {
 
   return (
     <>
-      {(data && 'data' in data && Array.isArray(data.data)) && <DropdownMenu projects={data} setChosedProject={setChosedProject} />}
+      <DropdownMenu projects={data} setChosedProject={setChosedProject} />
       {projectId && <Table id={projectId} />}
     </>
   );

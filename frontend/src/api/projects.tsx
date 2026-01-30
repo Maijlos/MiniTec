@@ -42,3 +42,10 @@ export async function getProjectHealth(id: number) {
   );
   return data.data;
 }
+
+export async function deleteProject(id: number) {
+  const data = await axios.delete(
+    `${import.meta.env.VITE_API_URL}/project/${id}`,
+  );
+  return data.data;
+}
