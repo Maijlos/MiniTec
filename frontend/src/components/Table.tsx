@@ -21,7 +21,7 @@ export function Table({ id }: { id: number }) {
   }
 
   if (Object.keys(projectHealth.data).length === 0) {
-    return <div>No data for this project.</div>;
+    return <div className="flex justify-center text-4xl">No data for this project.</div>;
   }
 
   if (projectHealth && "data" in projectHealth && projectHealth.data) {

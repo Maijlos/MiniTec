@@ -14,11 +14,11 @@ export function FetchProjects() {
   const [chosedProject, setChosedProject] = useState<number | null>(null);
 
   if (isError) {
-    return <div className="flex justify-center">Something went wrong!</div>;
+    return <div className="flex justify-center text-4xl">Something went wrong!</div>;
   }
 
   if (isLoading) {
-    return <div className="flex justify-center">Loading...</div>;
+    return <div className="flex justify-center text-4xl">Loading...</div>;
   }
 
   const projectId = chosedProject ?? (data && 'data' in data && Array.isArray(data.data) ? data.data[0].id : null)
