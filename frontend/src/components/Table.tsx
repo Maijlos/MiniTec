@@ -20,7 +20,9 @@ export function Table({ id }: { id: number }) {
     return <div>Loading...</div>;
   }
 
-  console.log(projectHealth);
+  if (Object.keys(projectHealth.data).length === 0) {
+    return <div>No data for this project.</div>;
+  }
 
   if (projectHealth && "data" in projectHealth && projectHealth.data) {
     let keyCount = 0;
@@ -34,8 +36,6 @@ export function Table({ id }: { id: number }) {
       keyCount++;
       rows.push(row);
     }
-
-    console.log(rows);
 
     return (
       <div className="overflow-x-auto">
@@ -67,10 +67,13 @@ export function Table({ id }: { id: number }) {
               return (
                 <tr>
                   {row.map((cell, cellIndex) => (
-                  <td key={cellIndex} className={cellIndex % 3 === 2 ? "border-r" : ""}>
-                    {cell}
-                  </td>
-                ))}
+                    <td
+                      key={cellIndex}
+                      className={cellIndex % 3 === 2 ? "border-r" : ""}
+                    >
+                      {cell}
+                    </td>
+                  ))}
                 </tr>
               );
             })}
