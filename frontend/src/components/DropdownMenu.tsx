@@ -1,7 +1,7 @@
 import type { SuccessfulData } from "../api/projects.tsx";
 
 type DropdownMenuProps = {
-  projects: SuccessfulData | undefined;
+  projects: SuccessfulData;
   setChosedProject: (id: number) => void;
 };
 
@@ -18,7 +18,7 @@ export function DropdownMenu({
         tabIndex={0}
         className="dropdown-content menu bg-base-100 rounded-box z-1 w-52 p-2 shadow-sm"
       >
-        {projects?.data?.map((project) => (
+        {Array.isArray(projects?.data) && projects.data.map((project) => (
           <li key={project.id}>
             <a onClick={() => setChosedProject(project.id)}>{project.name}</a>
           </li>

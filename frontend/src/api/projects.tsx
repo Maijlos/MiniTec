@@ -1,15 +1,23 @@
 import axios from "axios";
 
-export type Response = {
-  data: SuccessfulData & ErrorData;
-  status: number;
+type Response = {data: SuccessfulData | ErrorData};
+
+type Stations = {
+  [name: string]: [
+    {
+      finalStatus: string;
+      startDT: string;
+      endDT: string;
+    },
+  ];
 };
 
 export type SuccessfulData = {
   code: number;
-  data: Project[];
+  data: Project[] | Stations;
   shortMessage: "success";
 };
+
 
 export type ErrorData = {
   code: number;
@@ -23,6 +31,14 @@ export type Project = {
   name: string;
 };
 
-export async function getProjects(): Promise<Response> {
-  return await axios.get(`${import.meta.env.VITE_API_URL}/project`);
+export async function getProjects(): Promise<SuccessfulData | ErrorData> {
+  const data: Response = await axios.get(`${import.meta.env.VITE_API_URL}/project`);
+  return data.data;
+}
+
+export async function getProjectHealth(id: number) {
+  const data = await axios.get(
+    `${import.meta.env.VITE_API_URL}/project/health/${id}`,
+  );
+  return data.data;
 }
