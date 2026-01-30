@@ -138,9 +138,9 @@ func (p *Project) GetProjectByCode(c echo.Context) error {
 	}
 
 	return c.JSON(http.StatusOK, response.SuccessfulResponse{
-		Code: http.StatusOK,
+		Code:         http.StatusOK,
 		ShortMessage: messages.SUCCESS,
-		Data: []response.Project{response.MapModelToResponse(project)},
+		Data:         []response.Project{response.MapModelToResponse(project)},
 	})
 }
 
@@ -320,7 +320,7 @@ func (p *Project) GetProjectHealth(c echo.Context) error {
 		})
 	}
 
-	result, err :=p.ProjectService.GetProjectHealth(ctx, project.ID)
+	result, err := p.ProjectService.GetProjectHealth(ctx, project.ID)
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, response.ErrorResponse{
 			Code:         http.StatusInternalServerError,

@@ -45,9 +45,9 @@ func ApiKeyValidator(next echo.HandlerFunc) echo.HandlerFunc {
 
 		slog.Error("Invalid API Key provided.")
 		return c.JSON(http.StatusUnauthorized, ErrorResponse{
-				Code:         http.StatusUnauthorized,
-				ShortMessage: messages.NOT_AUTHORISED_SHORT,
-				Message:      messages.NOT_AUTHORISED,
-			})
+			Code:         http.StatusUnauthorized,
+			ShortMessage: messages.NOT_AUTHORISED_SHORT,
+			Message:      messages.NOT_AUTHORISED,
+		})
 	}
 }

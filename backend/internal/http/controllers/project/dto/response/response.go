@@ -5,7 +5,6 @@ import (
 	"backend/internal/http/services/project"
 )
 
-
 type Project struct {
 	Id   int64  `json:"id"`
 	Code string `json:"code"`
@@ -19,8 +18,8 @@ type SuccessfulResponse struct {
 }
 
 type SuccessfulResponseHealth struct {
-	Code         int       `json:"code"`
-	ShortMessage string    `json:"short_message"`
+	Code         int                              `json:"code"`
+	ShortMessage string                           `json:"short_message"`
 	Data         map[string][]project.StringState `json:"data"`
 }
 

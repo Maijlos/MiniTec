@@ -138,7 +138,7 @@ func (p *Project) ProjectHealth(ctx context.Context, id int64, reader *csv.Reade
 }
 
 func (p *Project) GetProjectHealth(ctx context.Context, id int64) (map[string][]StringState, error) {
-	
+
 	data := make(map[string][]StringState)
 
 	stations, err := p.station.GetStationsToProject(ctx, id)
@@ -157,7 +157,7 @@ func (p *Project) GetProjectHealth(ctx context.Context, id int64) (map[string][]
 			finalState := strconv.Itoa(int(state.FinalState))
 			startDate := "none"
 			endDate := "none"
-			
+
 			if state.StartDate.Valid {
 				startDate = state.StartDate.Time.Format("02-01-2006 15:04:05")
 			}
