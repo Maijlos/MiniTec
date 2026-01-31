@@ -43,7 +43,13 @@ func (p *Project) CreateProject(c echo.Context) error {
 	}
 
 	ctx := c.Request().Context()
-	id, err := p.ProjectService.CreateProject(ctx, u.Code, u.Name)
+	code := u.Code
+	name := u.Name
+	if name == "" {
+		name = code
+	}
+
+	id, err := p.ProjectService.CreateProject(ctx, code, name)
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, response.ErrorResponse{
 			Code:         http.StatusInternalServerError,
@@ -58,8 +64,8 @@ func (p *Project) CreateProject(c echo.Context) error {
 		Data: []response.Project{
 			{
 				Id:   *id,
-				Code: u.Code,
-				Name: u.Name,
+				Code: code,
+				Name: name,
 			},
 		},
 	})
