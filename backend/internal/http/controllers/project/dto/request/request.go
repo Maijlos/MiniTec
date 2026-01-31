@@ -5,6 +5,11 @@ type CreateProject struct {
 	Name string `json:"name"`
 }
 
+type UpdateProject struct {
+	Code string `json:"code"`
+	Name string `json:"name"`
+}
+
 type GetProjectByCode struct {
 	Code string `query:"code" validate:"required"`
 }

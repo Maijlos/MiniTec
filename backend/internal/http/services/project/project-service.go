@@ -77,8 +77,33 @@ func (p *Project) GetProjectByCode(ctx context.Context, code string) (minitec_db
 	return result, err
 }
 
-func (p *Project) UpdateProject() {
+func (p *Project) UpdateProject(ctx context.Context, id int64, code string, name string) error {
+	project, err := p.GetProject(ctx, id)
+	if err != nil {
+		return err
+	}
 
+	if (code == "") {
+		code = project.Code
+	}
+
+	if (name == "") {
+		name = project.Name
+	}
+
+
+	err = p.queries.UpdateProject(ctx, minitec_db.UpdateProjectParams{
+		ID:   id,
+		Code: code,
+		Name: name,
+	})
+
+	if err != nil {
+		slog.Error("Failed to write to DB")
+		return err
+	}
+
+	return nil
 }
 
 func (p *Project) DeleteProject(ctx context.Context, id int64) error {

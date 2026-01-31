@@ -150,8 +150,57 @@ func (p *Project) GetProjectByCode(c echo.Context) error {
 	})
 }
 
-func (p *Project) UpdateProject() {
+func (p *Project) UpdateProject(c echo.Context) error {
+	idParam := c.Param("id")
+	id, err := strconv.ParseInt(idParam, 10, 64)
+	if err != nil {
+		return c.JSON(http.StatusBadRequest, response.ErrorResponse{
+			Code:         http.StatusBadRequest,
+			Message:      messages.INVALID_ID,
+			ShortMessage: messages.INVALID_ID_SHORT,
+		})
+	}
 
+	u := new(request.UpdateProject)
+	if err := c.Bind(u); err != nil {
+		return c.JSON(http.StatusBadRequest, response.ErrorResponse{
+			Code:         http.StatusBadRequest,
+			Message:      messages.INVALID_JSON,
+			ShortMessage: messages.INVALID_JSON_SHORT,
+		})
+	}
+
+	if err := c.Validate(u); err != nil {
+		return c.JSON(http.StatusBadRequest, response.ErrorResponse{
+			Code:         http.StatusBadRequest,
+			Message:      messages.INVALID_BODY,
+			ShortMessage: messages.INVALID_BODY_SHORT,
+		})
+	}
+
+	ctx := c.Request().Context()
+	err = p.ProjectService.UpdateProject(ctx, id, u.Code, u.Name)
+	if err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			return c.JSON(http.StatusNotFound, response.ErrorResponse{
+				Code:         http.StatusNotFound,
+				Message:      messages.NOT_FOUND,
+				ShortMessage: messages.NOT_FOUND_SHORT,
+			})
+		}
+
+		return c.JSON(http.StatusInternalServerError, response.ErrorResponse{
+			Code:         http.StatusInternalServerError,
+			Message:      messages.SERVER_ERROR,
+			ShortMessage: messages.SERVER_ERROR_SHORT,
+		})
+	}
+
+	return c.JSON(http.StatusOK, response.SuccessfulResponse{
+		Code:         http.StatusOK,
+		ShortMessage: messages.SUCCESS,
+		Data:         []response.Project{},
+	})
 }
 
 func (p *Project) DeleteProject(c echo.Context) error {

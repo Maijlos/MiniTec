@@ -10,42 +10,6 @@ import (
 	"database/sql"
 )
 
-const countStationsPerProject = `-- name: CountStationsPerProject :many
-SELECT p.name, COUNT(s.id) as station_count
-FROM Project p
-LEFT JOIN Station s ON p.id = s.project_id
-GROUP BY p.id
-`
-
-type CountStationsPerProjectRow struct {
-	Name         string
-	StationCount int64
-}
-
-// Count the number of stations per project
-func (q *Queries) CountStationsPerProject(ctx context.Context) ([]CountStationsPerProjectRow, error) {
-	rows, err := q.db.QueryContext(ctx, countStationsPerProject)
-	if err != nil {
-		return nil, err
-	}
-	defer rows.Close()
-	var items []CountStationsPerProjectRow
-	for rows.Next() {
-		var i CountStationsPerProjectRow
-		if err := rows.Scan(&i.Name, &i.StationCount); err != nil {
-			return nil, err
-		}
-		items = append(items, i)
-	}
-	if err := rows.Close(); err != nil {
-		return nil, err
-	}
-	if err := rows.Err(); err != nil {
-		return nil, err
-	}
-	return items, nil
-}
-
 const createProject = `-- name: CreateProject :execresult
 INSERT INTO Project (name, code)
 VALUES (?, ?)
@@ -95,68 +59,12 @@ func (q *Queries) CreateStation(ctx context.Context, arg CreateStationParams) (s
 	return q.db.ExecContext(ctx, createStation, arg.Name, arg.ProjectID)
 }
 
-const createUser = `-- name: CreateUser :execresult
-INSERT INTO User (first_name, second_name, email, isAdmin, isBanned)
-VALUES (?, ?, ?, ?, ?)
-`
-
-type CreateUserParams struct {
-	FirstName  string
-	SecondName string
-	Email      string
-	Isadmin    bool
-	Isbanned   bool
-}
-
-func (q *Queries) CreateUser(ctx context.Context, arg CreateUserParams) (sql.Result, error) {
-	return q.db.ExecContext(ctx, createUser,
-		arg.FirstName,
-		arg.SecondName,
-		arg.Email,
-		arg.Isadmin,
-		arg.Isbanned,
-	)
-}
-
-const createUserProject = `-- name: CreateUserProject :execresult
-INSERT INTO User_Project (user_id, project_id)
-VALUES (?, ?)
-`
-
-type CreateUserProjectParams struct {
-	UserID    int64
-	ProjectID int64
-}
-
-func (q *Queries) CreateUserProject(ctx context.Context, arg CreateUserProjectParams) (sql.Result, error) {
-	return q.db.ExecContext(ctx, createUserProject, arg.UserID, arg.ProjectID)
-}
-
 const deleteProject = `-- name: DeleteProject :execresult
 DELETE FROM Project WHERE id = ?
 `
 
 func (q *Queries) DeleteProject(ctx context.Context, id int64) (sql.Result, error) {
 	return q.db.ExecContext(ctx, deleteProject, id)
-}
-
-const getActiveStationState = `-- name: GetActiveStationState :one
-SELECT id, final_state, start_date, end_date, station_id FROM State
-WHERE station_id = ? AND end_date IS NULL
-`
-
-// Find the current active state for a station (assuming null end_date means active)
-func (q *Queries) GetActiveStationState(ctx context.Context, stationID int64) (State, error) {
-	row := q.db.QueryRowContext(ctx, getActiveStationState, stationID)
-	var i State
-	err := row.Scan(
-		&i.ID,
-		&i.FinalState,
-		&i.StartDate,
-		&i.EndDate,
-		&i.StationID,
-	)
-	return i, err
 }
 
 const getProject = `-- name: GetProject :one
@@ -214,24 +122,6 @@ func (q *Queries) GetStationId(ctx context.Context, arg GetStationIdParams) (int
 	return id, err
 }
 
-const getUser = `-- name: GetUser :one
-SELECT id, first_name, second_name, email, isadmin, isbanned FROM User WHERE id = ?
-`
-
-func (q *Queries) GetUser(ctx context.Context, id int64) (User, error) {
-	row := q.db.QueryRowContext(ctx, getUser, id)
-	var i User
-	err := row.Scan(
-		&i.ID,
-		&i.FirstName,
-		&i.SecondName,
-		&i.Email,
-		&i.Isadmin,
-		&i.Isbanned,
-	)
-	return i, err
-}
-
 const listProjects = `-- name: ListProjects :many
 SELECT id, name, code FROM Project 
 ORDER BY code 
@@ -256,37 +146,6 @@ func (q *Queries) ListProjects(ctx context.Context, arg ListProjectsParams) ([]P
 			return nil, err
 		}
 		items = append(items, i)
-	}
-	if err := rows.Close(); err != nil {
-		return nil, err
-	}
-	if err := rows.Err(); err != nil {
-		return nil, err
-	}
-	return items, nil
-}
-
-const listProjectsWithoutUsers = `-- name: ListProjectsWithoutUsers :many
-SELECT p.name
-FROM Project p
-LEFT JOIN User_Project up ON p.id = up.project_id
-WHERE up.user_id IS NULL
-`
-
-// Find projects that have no users assigned
-func (q *Queries) ListProjectsWithoutUsers(ctx context.Context) ([]string, error) {
-	rows, err := q.db.QueryContext(ctx, listProjectsWithoutUsers)
-	if err != nil {
-		return nil, err
-	}
-	defer rows.Close()
-	var items []string
-	for rows.Next() {
-		var name string
-		if err := rows.Scan(&name); err != nil {
-			return nil, err
-		}
-		items = append(items, name)
 	}
 	if err := rows.Close(); err != nil {
 		return nil, err
@@ -360,73 +219,19 @@ func (q *Queries) ListStationsByStation(ctx context.Context, stationID int64) ([
 	return items, nil
 }
 
-const listUsers = `-- name: ListUsers :many
-SELECT id, first_name, second_name, email, isadmin, isbanned FROM User
+const updateProject = `-- name: UpdateProject :exec
+UPDATE Project
+SET name = ?, code = ?
+WHERE id = ?
 `
 
-func (q *Queries) ListUsers(ctx context.Context) ([]User, error) {
-	rows, err := q.db.QueryContext(ctx, listUsers)
-	if err != nil {
-		return nil, err
-	}
-	defer rows.Close()
-	var items []User
-	for rows.Next() {
-		var i User
-		if err := rows.Scan(
-			&i.ID,
-			&i.FirstName,
-			&i.SecondName,
-			&i.Email,
-			&i.Isadmin,
-			&i.Isbanned,
-		); err != nil {
-			return nil, err
-		}
-		items = append(items, i)
-	}
-	if err := rows.Close(); err != nil {
-		return nil, err
-	}
-	if err := rows.Err(); err != nil {
-		return nil, err
-	}
-	return items, nil
+type UpdateProjectParams struct {
+	Name string
+	Code string
+	ID   int64
 }
 
-const listUsersByProject = `-- name: ListUsersByProject :many
-SELECT u.first_name, u.second_name, u.email
-FROM User u
-JOIN User_Project up ON u.id = up.user_id
-WHERE up.project_id = ?
-`
-
-type ListUsersByProjectRow struct {
-	FirstName  string
-	SecondName string
-	Email      string
-}
-
-// List all users assigned to a specific project
-func (q *Queries) ListUsersByProject(ctx context.Context, projectID int64) ([]ListUsersByProjectRow, error) {
-	rows, err := q.db.QueryContext(ctx, listUsersByProject, projectID)
-	if err != nil {
-		return nil, err
-	}
-	defer rows.Close()
-	var items []ListUsersByProjectRow
-	for rows.Next() {
-		var i ListUsersByProjectRow
-		if err := rows.Scan(&i.FirstName, &i.SecondName, &i.Email); err != nil {
-			return nil, err
-		}
-		items = append(items, i)
-	}
-	if err := rows.Close(); err != nil {
-		return nil, err
-	}
-	if err := rows.Err(); err != nil {
-		return nil, err
-	}
-	return items, nil
+func (q *Queries) UpdateProject(ctx context.Context, arg UpdateProjectParams) error {
+	_, err := q.db.ExecContext(ctx, updateProject, arg.Name, arg.Code, arg.ID)
+	return err
 }
