@@ -9,8 +9,4 @@ COPY . .
 
 RUN go build -o /main ./internal/minitec/main.go
 
-FROM alpine:latest
-
-COPY --from=builder main /main
-
 CMD ["/main"]
