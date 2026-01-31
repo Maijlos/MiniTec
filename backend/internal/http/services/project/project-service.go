@@ -83,14 +83,13 @@ func (p *Project) UpdateProject(ctx context.Context, id int64, code string, name
 		return err
 	}
 
-	if (code == "") {
+	if code == "" {
 		code = project.Code
 	}
 
-	if (name == "") {
+	if name == "" {
 		name = project.Name
 	}
-
 
 	err = p.queries.UpdateProject(ctx, minitec_db.UpdateProjectParams{
 		ID:   id,
