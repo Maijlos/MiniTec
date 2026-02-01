@@ -8,7 +8,7 @@ export function Table({ id }: { id: number }) {
     isError,
     isLoading,
   } = useQuery({
-    queryKey: projectKeys.projectInfo(id),
+    queryKey: projectKeys.projectHealth(id),
     queryFn: () => getProjectHealth(id),
   });
 
@@ -21,7 +21,11 @@ export function Table({ id }: { id: number }) {
   }
 
   if (Object.keys(projectHealth.data).length === 0) {
-    return <div className="flex justify-center text-4xl">No data for this project.</div>;
+    return (
+      <div className="flex justify-center text-4xl">
+        No data for this project.
+      </div>
+    );
   }
 
   if (projectHealth && "data" in projectHealth && projectHealth.data) {

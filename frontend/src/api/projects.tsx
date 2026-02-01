@@ -35,12 +35,21 @@ export async function getProjects(): Promise<SuccessfulData | ErrorData> {
   return data.data;
 }
 
+export async function getProject(id: number) {
+  const data = await axios.get(`/project/${id}`);
+  return data.data;
+}
+
 export async function createProject(
   name: string,
   code: string,
 ): Promise<SuccessfulData | ErrorData> {
   const data: Response = await axios.post(`/project`, { name, code });
   return data.data;
+}
+
+export function updateProject(id: number, name: string, code: string) {
+  return axios.put(`/project/${id}`, { name, code });
 }
 
 export async function getProjectHealth(id: number) {
